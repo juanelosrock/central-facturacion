@@ -1,59 +1,107 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Central Facturación — AppQimera
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Panel administrativo para la gestión de facturación electrónica DIAN (Colombia) mediante la API de Qimera.
 
-## About Laravel
+## Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Backend:** PHP 8.2+, Laravel 12
+- **Frontend:** Blade, Tailwind CSS 3, Alpine.js 3, Vite 7
+- **Base de datos:** MySQL
+- **Paquetes clave:** `spatie/laravel-permission`, `laravel/breeze`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requisitos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP >= 8.2
+- Composer
+- Node.js >= 18
+- MySQL
 
-## Learning Laravel
+## Instalación
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+git clone https://github.com/juanelosrock/central-facturacion.git
+cd central-facturacion
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+composer install
+npm install
 
-## Laravel Sponsors
+cp .env.example .env
+php artisan key:generate
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# Configurar DB en .env, luego:
+php artisan migrate --seed
+npm run build
+```
 
-### Premium Partners
+## Credenciales por defecto (desarrollo)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+| Campo | Valor |
+|-------|-------|
+| Email | admin@admin.com |
+| Password | password |
 
-## Contributing
+> **Cambiar antes de usar en producción.**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Configuración del API
 
-## Code of Conduct
+Ingresar a `/admin/settings` con el rol `admin` y configurar:
+- **URL del API Qimera:** `https://factura.grupoqimera.co/api`
+- **Token global del API**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Flujo de configuración por empresa
 
-## Security Vulnerabilities
+Cada empresa sigue 4 pasos en orden:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. **Empresa** — Datos básicos + sincronización con `/ubl2.1/config/{nit}/{dv}`
+2. **Software** — Identificador y PIN DIAN → `/ubl2.1/config/software`
+3. **Certificado** — Upload del `.p12` / `.pfx` → `/ubl2.1/config/certificate`
+4. **Resoluciones** — Habilitación (datos fijos DIAN) + resoluciones de producción
 
-## License
+## Roles y permisos
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Rol | Permisos |
+|-----|----------|
+| `admin` | Todos |
+| `editor` | `users.view`, `roles.view` |
+| `user` | Ninguno |
+
+Los permisos disponibles son: `users.*`, `roles.*`, `settings.*`, `companies.*` (view, create, edit, delete, sync).
+
+## Servidor de desarrollo
+
+```bash
+php artisan serve --port=8081
+npm run dev  # en otra terminal (hot reload)
+```
+
+## Estructura principal
+
+```
+app/
+├── Http/Controllers/Admin/
+│   ├── CompanyController.php          # CRUD empresas + sync API
+│   ├── CompanyResolutionController.php # Resoluciones + factura de prueba
+│   ├── UserController.php
+│   ├── RoleController.php
+│   └── SettingController.php
+├── Models/
+│   ├── Company.php                    # toApiPayload()
+│   ├── CompanySoftware.php
+│   ├── CompanyCertificate.php
+│   ├── CompanyResolution.php          # habilitationPayload(), habilitationTestInvoicePayload()
+│   └── Setting.php                    # Cache-aware key/value store
+├── Services/
+│   └── QimeraApiService.php           # Cliente cURL + debug panel
+└── View/Components/
+    └── company-progress.blade.php     # Indicador de progreso 4 pasos
+```
+
+## Variables de entorno clave
+
+```env
+APP_ENV=local          # cambiar a "production" en prod
+APP_DEBUG=true         # cambiar a false en prod
+DB_DATABASE=appqimera
+DB_USERNAME=root
+DB_PASSWORD=
+```
