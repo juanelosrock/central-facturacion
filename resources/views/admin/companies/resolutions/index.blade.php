@@ -104,12 +104,6 @@
 					   class="px-4 py-2 bg-orange-600 text-white rounded inline-block">
 						🧾 Preparar factura de prueba
 					</a>
-
-					{{-- Botón nota crédito de prueba --}}
-					<a href="{{ route('admin.companies.resolutions.test-credit-note.show', $company) }}"
-					   class="px-4 py-2 bg-green-700 text-white rounded inline-block">
-						📋 Preparar nota crédito de prueba
-					</a>
 				@endif
 
 				{{-- Toggle de habilitación manual --}}
@@ -157,6 +151,70 @@
                     las resoluciones de producción.
                 </p>
             @endif
+        </div>
+
+        {{-- ============================================================ --}}
+        {{-- PARTE 1B: RESOLUCIÓN DE NOTA CRÉDITO --}}
+        {{-- ============================================================ --}}
+        <div class="mb-6 bg-white p-6 shadow rounded border-l-4 border-green-500">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h3 class="font-bold text-lg">📋 Parte 1B: Resolución de nota crédito (tipo 4)</h3>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Datos fijos: prefijo <code class="font-mono">NC</code>, rango 1 → 99.999.999. Se envía una sola vez.
+                    </p>
+                </div>
+                @if ($company->creditNoteResolution?->last_synced_at)
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded font-semibold text-sm">
+                        ✅ Sincronizada {{ $company->creditNoteResolution->last_synced_at->diffForHumans() }}
+                    </span>
+                @elseif ($company->creditNoteResolution)
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded font-semibold text-sm">
+                        ⏳ Creada localmente, pendiente de sync
+                    </span>
+                @else
+                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded font-semibold text-sm">
+                        Pendiente
+                    </span>
+                @endif
+            </div>
+
+            @if ($company->creditNoteResolution)
+                @php $nc = $company->creditNoteResolution; @endphp
+                <div class="bg-gray-50 p-4 rounded mb-4 text-sm">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div><span class="font-semibold">Prefijo:</span> {{ $nc->prefix }}</div>
+                        <div><span class="font-semibold">Tipo doc:</span> {{ $nc->type_document_id }}</div>
+                        <div><span class="font-semibold">Desde:</span> {{ number_format($nc->from) }}</div>
+                        <div><span class="font-semibold">Hasta:</span> {{ number_format($nc->to) }}</div>
+                        <div><span class="font-semibold">Última sync:</span> {{ $nc->last_synced_at?->diffForHumans() ?? '—' }}</div>
+                        @if ($nc->api_resolution_id)
+                            <div><span class="font-semibold">ID API:</span> {{ $nc->api_resolution_id }}</div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            <div class="flex flex-wrap gap-2">
+                <form method="POST" action="{{ route('admin.companies.resolutions.credit-note-resolution', $company) }}">
+                    @csrf
+                    <button class="px-4 py-2 bg-green-700 text-white rounded"
+                            @disabled(empty($company->api_token))>
+                        @if ($company->creditNoteResolution)
+                            🔄 Reenviar resolución de nota crédito
+                        @else
+                            ➕ Crear resolución de nota crédito
+                        @endif
+                    </button>
+                </form>
+
+                @if ($company->creditNoteResolution)
+                    <a href="{{ route('admin.companies.resolutions.test-credit-note.show', $company) }}"
+                       class="px-4 py-2 bg-teal-600 text-white rounded inline-block">
+                        📋 Preparar nota crédito de prueba
+                    </a>
+                @endif
+            </div>
         </div>
 
         {{-- ============================================================ --}}

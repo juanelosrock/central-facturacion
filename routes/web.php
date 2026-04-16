@@ -44,6 +44,8 @@ Route::middleware('auth')->group(function () {
 			->name('companies.resolutions.index');
 		Route::post('companies/{company}/resolutions/habilitation', [CompanyResolutionController::class, 'storeHabilitation'])
 			->name('companies.resolutions.habilitation');
+		Route::post('companies/{company}/resolutions/credit-note-resolution', [CompanyResolutionController::class, 'storeCreditNoteResolution'])
+			->name('companies.resolutions.credit-note-resolution');
 		Route::post('companies/{company}/resolutions/toggle-habilitation', [CompanyResolutionController::class, 'toggleHabilitation'])
 			->name('companies.resolutions.toggle-habilitation');
 		Route::post('companies/{company}/resolutions', [CompanyResolutionController::class, 'store'])

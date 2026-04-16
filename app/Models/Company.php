@@ -102,4 +102,11 @@ class Company extends Model
 	{
 		return $this->hasMany(CompanyResolution::class)->where('is_habilitation', false);
 	}
+
+	public function creditNoteResolution()
+	{
+		return $this->hasOne(CompanyResolution::class)
+			->where('is_habilitation', false)
+			->where('type_document_id', 4);
+	}
 }

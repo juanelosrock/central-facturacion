@@ -26,7 +26,7 @@ class CompanyResolutionController extends Controller implements HasMiddleware
      */
     public function index(Company $company)
     {
-        $company->load(['habilitationResolution', 'productionResolutions']);
+        $company->load(['habilitationResolution', 'productionResolutions', 'creditNoteResolution']);
 
         return view('admin.companies.resolutions.index', compact('company'));
     }
@@ -65,6 +65,48 @@ class CompanyResolutionController extends Controller implements HasMiddleware
                 ->with('success', 'Resolución de habilitación creada/actualizada correctamente.');
         } catch (Throwable $e) {
             Log::error('Error al crear resolución de habilitación', [
+                'error' => $e->getMessage(),
+                'debug' => QimeraApiService::$lastDebug,
+            ]);
+
+            $this->flashDebug();
+
+            return redirect()->route('admin.companies.resolutions.index', $company)
+                ->with('error', 'Datos guardados, pero falló el envío al API: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Crea (o reenvía) la resolución de nota crédito con los datos fijos.
+     */
+    public function storeCreditNoteResolution(Company $company, QimeraApiService $api)
+    {
+        if (empty($company->api_token)) {
+            return back()->with('error', 'La empresa no tiene token del API. Completá el paso 1.');
+        }
+
+        $payload = CompanyResolution::creditNoteResolutionPayload();
+
+        $resolution = $company->resolutions()->updateOrCreate(
+            ['company_id' => $company->id, 'type_document_id' => 4, 'is_habilitation' => false],
+            array_merge($payload, ['is_habilitation' => false])
+        );
+
+        try {
+            $response = $api->configureResolution($company->api_token, $resolution->toApiPayload());
+
+            $resolution->update([
+                'api_resolution_id' => data_get($response, 'resolution.id'),
+                'api_response'      => $response,
+                'last_synced_at'    => now(),
+            ]);
+
+            $this->flashDebug();
+
+            return redirect()->route('admin.companies.resolutions.index', $company)
+                ->with('success', 'Resolución de nota crédito creada/actualizada correctamente.');
+        } catch (Throwable $e) {
+            Log::error('Error al crear resolución de nota crédito', [
                 'error' => $e->getMessage(),
                 'debug' => QimeraApiService::$lastDebug,
             ]);

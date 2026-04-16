@@ -72,6 +72,19 @@ class CompanyResolution extends Model
     }
 
     /**
+     * Payload fijo para la resolución de nota crédito (tipo 4).
+     */
+    public static function creditNoteResolutionPayload(): array
+    {
+        return [
+            'type_document_id' => 4,
+            'prefix'           => 'NC',
+            'from'             => 1,
+            'to'               => 99999999,
+        ];
+    }
+
+    /**
      * Payload fijo para la resolución de habilitación (DIAN ambiente de pruebas).
      */
     public static function habilitationPayload(): array
