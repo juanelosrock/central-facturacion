@@ -50,6 +50,8 @@ Route::middleware('auth')->group(function () {
 			->name('companies.resolutions.store');
 		Route::delete('companies/{company}/resolutions/{resolution}', [CompanyResolutionController::class, 'destroy'])
 			->name('companies.resolutions.destroy');
+		Route::get('companies/{company}/resolutions/test-invoice', [CompanyResolutionController::class, 'showTestInvoice'])
+			->name('companies.resolutions.test-invoice.show');
 		Route::post('companies/{company}/resolutions/test-invoice', [CompanyResolutionController::class, 'sendTestInvoice'])
 			->name('companies.resolutions.test-invoice');
         Route::resource('companies', CompanyController::class);

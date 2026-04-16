@@ -100,13 +100,10 @@
 
 				{{-- Botón enviar factura de prueba --}}
 				@if ($company->habilitationResolution)
-					<form method="POST" action="{{ route('admin.companies.resolutions.test-invoice', $company) }}">
-						@csrf
-						<button class="px-4 py-2 bg-orange-600 text-white rounded"
-								onclick="return confirm('Se enviará una factura de prueba al ambiente de habilitación DIAN. ¿Continuar?')">
-							🧾 Enviar factura de prueba
-						</button>
-					</form>
+					<a href="{{ route('admin.companies.resolutions.test-invoice.show', $company) }}"
+					   class="px-4 py-2 bg-orange-600 text-white rounded inline-block">
+						🧾 Preparar factura de prueba
+					</a>
 				@endif
 
 				{{-- Toggle de habilitación manual --}}

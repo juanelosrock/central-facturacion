@@ -184,9 +184,30 @@ class CompanyResolutionController extends Controller implements HasMiddleware
     }
 	
 	/**
+	 * Muestra el editor tipo Postman con el payload precargado para revisión.
+	 */
+	public function showTestInvoice(Company $company)
+	{
+		if (empty($company->api_token)) {
+			return redirect()->route('admin.companies.resolutions.index', $company)
+				->with('error', 'La empresa no tiene token del API.');
+		}
+
+		if (!$company->habilitationResolution) {
+			return redirect()->route('admin.companies.resolutions.index', $company)
+				->with('error', 'Primero debés crear la resolución de habilitación.');
+		}
+
+		$payload = CompanyResolution::habilitationTestInvoicePayload($company);
+		$payloadJson = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+		return view('admin.companies.resolutions.test-invoice', compact('company', 'payloadJson'));
+	}
+
+	/**
 	 * Envía la factura de prueba al ambiente de habilitación DIAN.
 	 */
-	public function sendTestInvoice(Company $company, QimeraApiService $api)
+	public function sendTestInvoice(Request $request, Company $company, QimeraApiService $api)
 	{
 		if (empty($company->api_token)) {
 			return back()->with('error', 'La empresa no tiene token del API.');
@@ -196,7 +217,12 @@ class CompanyResolutionController extends Controller implements HasMiddleware
 			return back()->with('error', 'Primero debés crear la resolución de habilitación.');
 		}
 
-		$payload = CompanyResolution::habilitationTestInvoicePayload($company);
+		$raw = $request->input('payload_json', '');
+		$payload = json_decode($raw, true);
+
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			return back()->withInput()->with('error', 'El JSON es inválido: ' . json_last_error_msg());
+		}
 
 		try {
 			$response = $api->sendInvoice($company->api_token, $payload);
@@ -225,8 +251,7 @@ class CompanyResolutionController extends Controller implements HasMiddleware
 
 			$this->flashDebug();
 
-			return redirect()->route('admin.companies.resolutions.index', $company)
-				->with('error', 'Error al enviar factura de prueba: ' . $e->getMessage());
+			return back()->withInput()->with('error', 'Error al enviar factura de prueba: ' . $e->getMessage());
 		}
 	}
 
