@@ -198,7 +198,7 @@
             <div class="flex flex-wrap gap-2">
                 <form method="POST" action="{{ route('admin.companies.resolutions.credit-note-resolution', $company) }}">
                     @csrf
-                    <button class="px-4 py-2 bg-green-700 text-white rounded"
+                    <button class="px-4 py-2 bg-blue-600 text-white rounded"
                             @disabled(empty($company->api_token))>
                         @if ($company->creditNoteResolution)
                             🔄 Reenviar resolución de nota crédito
@@ -210,7 +210,7 @@
 
                 @if ($company->creditNoteResolution)
                     <a href="{{ route('admin.companies.resolutions.test-credit-note.show', $company) }}"
-                       class="px-4 py-2 bg-teal-600 text-white rounded inline-block">
+                       class="px-4 py-2 bg-orange-600 text-white rounded inline-block">
                         📋 Preparar nota crédito de prueba
                     </a>
                 @endif
