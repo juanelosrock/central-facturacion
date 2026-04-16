@@ -169,17 +169,20 @@ class CompanyResolutionController extends Controller implements HasMiddleware
 
     protected function validateData(Request $request): array
     {
+        $tipoDoc = (int) $request->input('type_document_id');
+        $sinResolucion = in_array($tipoDoc, \App\Models\CompanyResolution::TYPES_WITHOUT_RESOLUTION);
+
         return $request->validate([
-            'type_document_id' => 'required|integer',
-            'prefix' => 'nullable|string|max:10',
-            'resolution' => 'required|string|max:50',
-            'resolution_date' => 'required|date',
-            'technical_key' => 'nullable|string|max:255',
-            'from' => 'required|integer|min:1',
-            'to' => 'required|integer|gt:from',
+            'type_document_id'  => 'required|integer',
+            'prefix'            => 'nullable|string|max:10',
+            'from'              => 'required|integer|min:1',
+            'to'                => 'required|integer|gt:from',
+            'resolution'        => $sinResolucion ? 'nullable|string|max:50'  : 'required|string|max:50',
+            'resolution_date'   => $sinResolucion ? 'nullable|date'           : 'required|date',
+            'technical_key'     => 'nullable|string|max:255',
             'generated_to_date' => 'nullable|integer|min:0',
-            'date_from' => 'required|date',
-            'date_to' => 'required|date|after_or_equal:date_from',
+            'date_from'         => $sinResolucion ? 'nullable|date'           : 'required|date',
+            'date_to'           => $sinResolucion ? 'nullable|date'           : 'required|date|after_or_equal:date_from',
         ]);
     }
 	

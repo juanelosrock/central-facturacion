@@ -47,20 +47,28 @@ class CompanyResolution extends Model
         return $this->belongsTo(Company::class);
     }
 
+    // Tipos que no requieren resolución DIAN (nota crédito, nota débito)
+    const TYPES_WITHOUT_RESOLUTION = [4, 5];
+
     public function toApiPayload(): array
     {
-        return [
+        $payload = [
             'type_document_id' => (int) $this->type_document_id,
-            'prefix' => $this->prefix,
-            'resolution' => $this->resolution,
-            'resolution_date' => $this->resolution_date?->format('Y-m-d'),
-            'technical_key' => $this->technical_key,
-            'from' => (int) $this->from,
-            'to' => (int) $this->to,
-            'generated_to_date' => (int) $this->generated_to_date,
-            'date_from' => $this->date_from?->format('Y-m-d'),
-            'date_to' => $this->date_to?->format('Y-m-d'),
+            'prefix'           => $this->prefix,
+            'from'             => (int) $this->from,
+            'to'               => (int) $this->to,
         ];
+
+        if (!in_array((int) $this->type_document_id, self::TYPES_WITHOUT_RESOLUTION)) {
+            $payload['resolution']         = $this->resolution;
+            $payload['resolution_date']    = $this->resolution_date?->format('Y-m-d');
+            $payload['technical_key']      = $this->technical_key;
+            $payload['generated_to_date']  = (int) $this->generated_to_date;
+            $payload['date_from']          = $this->date_from?->format('Y-m-d');
+            $payload['date_to']            = $this->date_to?->format('Y-m-d');
+        }
+
+        return $payload;
     }
 
     /**
