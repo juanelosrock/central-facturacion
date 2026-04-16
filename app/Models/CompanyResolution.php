@@ -91,6 +91,87 @@ class CompanyResolution extends Model
     }
 	
 	/**
+	 * Payload fijo de la nota crédito de prueba para habilitación DIAN.
+	 * La fecha y hora se generan al momento del envío.
+	 */
+	public static function habilitationTestCreditNotePayload(\App\Models\Company $company): array
+	{
+		return [
+			'billing_reference' => [
+				'number'     => 'SETP990000001',
+				'uuid'       => 'c1563db3e7aa8441153a8d5075ba393a9a19b6944c32551bd37a58cf77137502a85a4abee90dc551ae98333e46c473a7',
+				'issue_date' => now()->format('Y-m-d'),
+			],
+			'discrepancyresponsecode'        => 2,
+			'discrepancyresponsedescription' => 'PRUEBA DE MOTIVO NOTA CREDITO',
+			'notes'          => 'PRUEBA DE NOTA CREDITO',
+			'prefix'         => 'NC',
+			'number'         => 2,
+			'type_document_id' => 4,
+			'date'           => now()->format('Y-m-d'),
+			'time'           => now()->format('H:i:s'),
+			'establishment_name'         => $company->business_name,
+			'establishment_address'      => $company->address,
+			'establishment_phone'        => (string) $company->phone,
+			'establishment_municipality' => 600,
+			'sendmail'       => true,
+			'sendmailtome'   => true,
+			'seze'           => '2021-2017',
+			'head_note'      => 'PRUEBA DE TEXTO LIBRE QUE DEBE POSICIONARSE EN EL ENCABEZADO DE PAGINA DE LA REPRESENTACION GRAFICA DE LA FACTURA ELECTRONICA VALIDACION PREVIA DIAN',
+			'foot_note'      => 'PRUEBA DE TEXTO LIBRE QUE DEBE POSICIONARSE EN EL PIE DE PAGINA DE LA REPRESENTACION GRAFICA DE LA FACTURA ELECTRONICA VALIDACION PREVIA DIAN',
+			'customer' => [
+				'identification_number'          => 900166483,
+				'dv'                             => 1,
+				'name'                           => 'INVERSIONES DAVAL SAS',
+				'phone'                          => '3103891693',
+				'address'                        => 'CLL 4 NRO 33-90',
+				'email'                          => 'soporte@sibco.com.co',
+				'merchant_registration'          => '0000000-00',
+				'type_document_identification_id' => 6,
+				'type_organization_id'           => 1,
+				'municipality_id'                => 822,
+				'type_regime_id'                 => 1,
+			],
+			'tax_totals' => [
+				[
+					'tax_id'         => 1,
+					'tax_amount'     => '159663.865',
+					'percent'        => '19.00',
+					'taxable_amount' => '840336.134',
+				],
+			],
+			'legal_monetary_totals' => [
+				'line_extension_amount' => '840336.134',
+				'tax_exclusive_amount'  => '840336.134',
+				'tax_inclusive_amount'  => '1000000.00',
+				'payable_amount'        => '1000000.00',
+			],
+			'credit_note_lines' => [
+				[
+					'unit_measure_id'      => 70,
+					'invoiced_quantity'    => '1',
+					'line_extension_amount' => '840336.134',
+					'free_of_charge_indicator' => false,
+					'tax_totals' => [
+						[
+							'tax_id'         => 1,
+							'tax_amount'     => '159663.865',
+							'taxable_amount' => '840336.134',
+							'percent'        => '19.00',
+						],
+					],
+					'description'               => 'COMISION POR SERVICIOS',
+					'notes'                     => 'ESTA ES UNA PRUEBA DE NOTA DE DETALLE DE LINEA.',
+					'code'                      => 'COMISION',
+					'type_item_identification_id' => 4,
+					'price_amount'              => '1000000.00',
+					'base_quantity'             => '1',
+				],
+			],
+		];
+	}
+
+	/**
 	 * Payload fijo de la factura de prueba para habilitación DIAN.
 	 * La fecha y hora se generan al momento del envío.
 	 */

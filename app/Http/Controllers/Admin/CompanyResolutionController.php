@@ -167,6 +167,62 @@ class CompanyResolutionController extends Controller implements HasMiddleware
             ->with('success', 'Resolución eliminada localmente.');
     }
 
+	/**
+	 * Muestra el editor tipo Postman con el payload de nota crédito de prueba.
+	 */
+	public function showTestCreditNote(Company $company)
+	{
+		if (empty($company->api_token)) {
+			return redirect()->route('admin.companies.resolutions.index', $company)
+				->with('error', 'La empresa no tiene token del API.');
+		}
+
+		if (!$company->habilitationResolution) {
+			return redirect()->route('admin.companies.resolutions.index', $company)
+				->with('error', 'Primero debés crear la resolución de habilitación.');
+		}
+
+		$payload = CompanyResolution::habilitationTestCreditNotePayload($company);
+		$payloadJson = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+		return view('admin.companies.resolutions.test-credit-note', compact('company', 'payloadJson'));
+	}
+
+	/**
+	 * Envía la nota crédito de prueba al API.
+	 */
+	public function sendTestCreditNote(Request $request, Company $company, QimeraApiService $api)
+	{
+		if (empty($company->api_token)) {
+			return back()->with('error', 'La empresa no tiene token del API.');
+		}
+
+		$raw = $request->input('payload_json', '');
+		$payload = json_decode($raw, true);
+
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			return back()->withInput()->with('error', 'El JSON es inválido: ' . json_last_error_msg());
+		}
+
+		try {
+			$response = $api->sendCreditNote($company->api_token, $payload);
+
+			$this->flashDebug();
+
+			return redirect()->route('admin.companies.resolutions.index', $company)
+				->with('success', 'Nota crédito de prueba enviada. Revisá la respuesta del API abajo.');
+		} catch (Throwable $e) {
+			Log::error('Error al enviar nota crédito de prueba', [
+				'error' => $e->getMessage(),
+				'debug' => QimeraApiService::$lastDebug,
+			]);
+
+			$this->flashDebug();
+
+			return back()->withInput()->with('error', 'Error al enviar nota crédito de prueba: ' . $e->getMessage());
+		}
+	}
+
     protected function validateData(Request $request): array
     {
         $tipoDoc = (int) $request->input('type_document_id');

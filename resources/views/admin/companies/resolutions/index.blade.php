@@ -104,6 +104,12 @@
 					   class="px-4 py-2 bg-orange-600 text-white rounded inline-block">
 						🧾 Preparar factura de prueba
 					</a>
+
+					{{-- Botón nota crédito de prueba --}}
+					<a href="{{ route('admin.companies.resolutions.test-credit-note.show', $company) }}"
+					   class="px-4 py-2 bg-green-700 text-white rounded inline-block">
+						📋 Preparar nota crédito de prueba
+					</a>
 				@endif
 
 				{{-- Toggle de habilitación manual --}}

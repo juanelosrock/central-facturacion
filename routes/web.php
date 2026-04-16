@@ -54,6 +54,10 @@ Route::middleware('auth')->group(function () {
 			->name('companies.resolutions.test-invoice.show');
 		Route::post('companies/{company}/resolutions/test-invoice', [CompanyResolutionController::class, 'sendTestInvoice'])
 			->name('companies.resolutions.test-invoice');
+		Route::get('companies/{company}/resolutions/test-credit-note', [CompanyResolutionController::class, 'showTestCreditNote'])
+			->name('companies.resolutions.test-credit-note.show');
+		Route::post('companies/{company}/resolutions/test-credit-note', [CompanyResolutionController::class, 'sendTestCreditNote'])
+			->name('companies.resolutions.test-credit-note');
         Route::resource('companies', CompanyController::class);
     });
 });

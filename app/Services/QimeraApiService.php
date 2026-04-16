@@ -77,6 +77,17 @@ class QimeraApiService
 		return $this->request('POST', $url, $payload, true, $companyToken);
 	}
 
+	/**
+	 * POST /ubl2.1/credit-note
+	 * Envía una nota crédito (o nota crédito de prueba para habilitación).
+	 */
+	public function sendCreditNote(string $companyToken, array $payload): array
+	{
+		$url = "{$this->baseUrl}/ubl2.1/credit-note";
+
+		return $this->request('POST', $url, $payload, true, $companyToken);
+	}
+
     /**
      * Ejecuta un request HTTP con cURL nativo.
      *
